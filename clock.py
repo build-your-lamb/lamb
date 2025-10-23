@@ -11,7 +11,7 @@ from SHT31 import SHT31
 
 sht31 = SHT31()
 
-API_KEY = "11995af436fd3c6893b3e8e3b83c88e9"
+API_KEY = ""
 WEATHER_LOCATION = "Taipei"
 
 # Initialize pygame

@@ -5,6 +5,9 @@ import subprocess
 import logging
 import psutil
 
+logging.basicConfig(level=logging.INFO)
+
+MEET_URL = 'https://meet-chi-flax.vercel.app'
 LIVEKIT_ROOM = 'room'
 MEET_PROCESS_NAME = 'meet'
 
@@ -52,7 +55,7 @@ def launch_meet_process(livekit_url, livekit_token):
             logging.error(f"Launching meet process failed: {e}")
             raise
 
-async def meet_command(update, context):
+async def join_command(update, context):
     keys = context.bot_data['api_keys']
     api_key = keys['livekit_api_key']
     api_secret = keys['livekit_api_secret']
@@ -61,10 +64,17 @@ async def meet_command(update, context):
     bot_id = 'bot'
     bot_token = get_livekit_token(api_key, api_secret, bot_id)
     launch_meet_process(livekit_url, bot_token)
+    await update.message.reply_text(f'Bot is joining')
+
+async def meet_command(update, context):
+    keys = context.bot_data['api_keys']
+    api_key = keys['livekit_api_key']
+    api_secret = keys['livekit_api_secret']
+    livekit_url = keys['livekit_url']
 
     user_id = str(update.message.from_user.id)
     user_token = get_livekit_token(api_key, api_secret, user_id)
-    meet_link = f'https://meet.livekit.io/custom?liveKitUrl={livekit_url}&token={user_token}'
+    meet_link = f'{MEET_URL}/custom?liveKitUrl={livekit_url}&token={user_token}'
     await update.message.reply_text(f'Click the link to join the meeting:\n{meet_link}')
 
 def main():
@@ -74,6 +84,7 @@ def main():
     app = ApplicationBuilder().token(bot_token).build()
     app.bot_data['api_keys'] = keys
 
+    app.add_handler(CommandHandler('join', join_command))
     app.add_handler(CommandHandler('meet', meet_command))
 
     print('Launching bot...')
